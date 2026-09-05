@@ -97,7 +97,7 @@ class ModifyControllerTest {
         updated.setUser_id(9);
         updated.setUsername("lisa");
         updated.setEmail("lisa@example.com");
-        updated.setProfile_picture_url("http://localhost:8080/api/picture/user_9_avatar.png");
+        updated.setProfile_picture_url("/api/picture/user_9_avatar.png");
         updated.setUpdated_at(LocalDateTime.now());
 
         when(modifyService.updateUser(eq(9), any(User.class))).thenReturn(updated);
@@ -110,10 +110,10 @@ class ModifyControllerTest {
         ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
         verify(modifyService).updateUser(eq(9), captor.capture());
         assertThat(captor.getValue().getProfile_picture_url())
-                .isEqualTo("http://localhost:8080/api/picture/user_9_avatar.png");
+                .isEqualTo("/api/picture/user_9_avatar.png");
 
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getProfilePictureUrl())
-                .isEqualTo("http://localhost:8080/api/picture/user_9_avatar.png");
+                .isEqualTo("/api/picture/user_9_avatar.png");
     }
 }

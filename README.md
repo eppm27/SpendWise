@@ -49,9 +49,13 @@ Open `http://localhost:5173`. Vite forwards `/api` requests to the backend. For 
 
 ## Optional integrations
 
-Set `GEMINI_API_KEY` in `backend/.env.local` for AI suggestions. For currency conversion, copy `frontend/.env.example` to `frontend/.env.local` and set `VITE_UNIRATE_API_KEY`, then restart Vite. Vite variables are visible to the browser; use a key intended for client-side use. External integrations require valid keys and provider access.
+Set `GEMINI_API_KEY` and `UNIRATE_API_KEY` in `backend/.env.local`, reload the environment, and restart the backend. Currency conversion is authenticated and handled entirely by Spring Boot. No provider keys belong in frontend variables or browser bundles. External integrations require valid keys and provider access.
 
 Local environment files, generated builds, uploads, and credentials are excluded from this repository. No database contents or old Git history are included.
+
+## Deployment
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for Vercel frontend routing, Render backend/database setup, production cookies, and required environment variables.
 
 ## Checks
 

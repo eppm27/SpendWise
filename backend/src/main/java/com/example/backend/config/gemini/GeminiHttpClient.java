@@ -58,13 +58,14 @@ public class GeminiHttpClient implements GeminiClient {
         );
 
         String url = "https://generativelanguage.googleapis.com/v1beta/models/" +
-                props.getModel() + ":generateContent?key=" + props.getApiKey();
+                props.getModel() + ":generateContent";
 
-        System.out.println("url: "+ props.getApiKey());
+
 
         var rt = newRt();
         var headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-goog-api-key", props.getApiKey());
         var req = new HttpEntity<>(body, headers);
 
         ResponseEntity<String> resp = rt.exchange(url, HttpMethod.POST, req, String.class);

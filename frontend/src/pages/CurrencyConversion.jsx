@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { currencyService } from "../services/api";
 import { FaExchangeAlt } from "react-icons/fa";
 
 const CURRENCY_OPTIONS = [
@@ -45,47 +46,35 @@ export default function CurrencyConversion() {
     return Number(convertedAmount) / Number(amount);
   }, [convertedAmount, amount]);
 
+  const [refreshVersion, setRefreshVersion] = useState(0);
+
   useEffect(() => {
-    if (amount > 0) {
-      void convertCurrency();
-    } else {
-      setConvertedAmount("");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fromCurrency, toCurrency, amount]);
-
-  const convertCurrency = async () => {
-    if (amount <= 0 || !fromCurrency || !toCurrency) {
-      return;
-    }
-
-    setIsLoading(true);
+    const controller = new AbortController();
+    setConvertedAmount("");
     setError("");
-
-    try {
-      const apiKey = import.meta.env.VITE_UNIRATE_API_KEY;
-      const url = `https://api.unirateapi.com/api/convert?api_key=${apiKey}&amount=${amount}&from=${fromCurrency}&to=${toCurrency}&format=json`;
-
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || "Currency conversion failed");
-        console.error("API Error:", data);
-        setConvertedAmount("");
-        return;
-      }
-
-      const formattedResult = Number(data.result).toFixed(4);
-      setConvertedAmount(formattedResult);
-    } catch (convertError) {
-      setError("Failed to connect to currency service");
-      console.error("Fetch Error:", convertError);
-      setConvertedAmount("");
-    } finally {
+    if (!Number.isFinite(Number(amount)) || Number(amount) <= 0) {
       setIsLoading(false);
+      return () => controller.abort();
     }
-  };
+    setIsLoading(true);
+    const timer = setTimeout(async () => {
+      try {
+        const { data } = await currencyService.convert(
+          { amount, from: fromCurrency, to: toCurrency }, controller.signal
+        );
+        if (!controller.signal.aborted) setConvertedAmount(Number(data.result).toFixed(4));
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          setError(error.response?.status === 401
+            ? "Please sign in again to convert currencies."
+            : "Currency conversion is temporarily unavailable. Please try again.");
+        }
+      } finally {
+        if (!controller.signal.aborted) setIsLoading(false);
+      }
+    }, 350);
+    return () => { clearTimeout(timer); controller.abort(); };
+  }, [amount, fromCurrency, toCurrency, refreshVersion]);
 
   const swapCurrencies = () => {
     setFromCurrency(toCurrency);
@@ -218,7 +207,7 @@ export default function CurrencyConversion() {
               </button>
               <button
                 type="button"
-                onClick={convertCurrency}
+                onClick={() => setRefreshVersion(value => value + 1)}
                 className="inline-flex items-center gap-2 rounded-full bg-gray-900 dark:bg-indigo-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition-colors hover:bg-gray-700 dark:hover:bg-indigo-700"
               >
                 Refresh Rate

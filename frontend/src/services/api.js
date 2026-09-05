@@ -180,4 +180,10 @@ export const achievementsService = {
   }
 };
 
+export const currencyService = {
+  convert: (params, signal) => api.get("/api/currency/convert", {
+    params, signal, timeout: 15000,
+  }),
+};
+
 export default api;
